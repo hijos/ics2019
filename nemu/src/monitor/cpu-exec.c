@@ -12,6 +12,8 @@
 /* restrict the size of log file */
 #define LOG_MAX (1024 * 1024)
 
+extern WP* head;
+
 NEMUState nemu_state = {.state = NEMU_STOP};
 
 void interpret_rtl_exit(int state, vaddr_t halt_pc, uint32_t halt_ret) {
@@ -45,31 +47,44 @@ void cpu_exec(uint64_t n) {
      * instruction decode, and the actual execution. */
     __attribute__((unused)) vaddr_t seq_pc = exec_once();
 
-#if defined(DIFF_TEST)
-  difftest_step(ori_pc, cpu.pc);
-#endif
+    #if defined(DIFF_TEST)
+      difftest_step(ori_pc, cpu.pc);
+    #endif
 
-#ifdef DEBUG
-  if (g_nr_guest_instr < LOG_MAX) {
-    asm_print(ori_pc, seq_pc - ori_pc, n < MAX_INSTR_TO_PRINT);
-  }
-  else if (g_nr_guest_instr == LOG_MAX) {
-    log_write("\n[Warning] To restrict the size of log file, "
+    #ifdef DEBUG
+      if (g_nr_guest_instr < LOG_MAX) {
+        asm_print(ori_pc, seq_pc - ori_pc, n < MAX_INSTR_TO_PRINT);
+      }
+      else if (g_nr_guest_instr == LOG_MAX) {
+        log_write("\n[Warning] To restrict the size of log file, "
               "we do not record more instruction trace beyond this point.\n"
               "To capture more trace, you can modify the LOG_MAX macro in %s\n\n", __FILE__);
-  }
-  log_clearbuf();
+      }
+      log_clearbuf();
 
-    /* TODO: check watchpoints here. */
+      /* TODO: check watchpoints here. */
+      bool success;
+      int res, flag = 0;
+      for(WP *tmp = head; tmp; tmp = tmp->next){
+        res = expr(tmp->wp_expr, &success);
+        if(res != tmp->last_value){
+          flag = 1;
+          tmp->last_value = res;
+       }
+      }
+      if(flag){
+       printf("Watchpoint triggered!\n");
+        nemu_state.state = NEMU_STOP;
+      }
 
-#endif
+    #endif
 
-  g_nr_guest_instr ++;
+    g_nr_guest_instr ++;
 
-#ifdef HAS_IOE
-    extern void device_update();
-    device_update();
-#endif
+    #ifdef HAS_IOE
+      extern void device_update();
+      device_update();
+    #endif
 
     if (nemu_state.state != NEMU_RUNNING) break;
   }
