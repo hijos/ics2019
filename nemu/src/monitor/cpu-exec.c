@@ -12,6 +12,8 @@
 /* restrict the size of log file */
 #define LOG_MAX (1024 * 1024)
 
+extern uint32_t expr(char *e, bool *success);
+
 extern WP* head;
 
 NEMUState nemu_state = {.state = NEMU_STOP};
