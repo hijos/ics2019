@@ -67,15 +67,18 @@ void cpu_exec(uint64_t n) {
       /* TODO: check watchpoints here. */
       bool success;
       int res, flag = 0;
+      int watch_point_no = -1;
       for(WP *tmp = head; tmp; tmp = tmp->next){
         res = expr(tmp->wp_expr, &success);
         if(res != tmp->last_value){
           flag = 1;
+          watch_point_no = tmp->NO;
           tmp->last_value = res;
+          break;
        }
       }
       if(flag){
-       printf("Watchpoint triggered!\n");
+        printf("Watchpoint %d triggered!\n", watch_point_no);
         nemu_state.state = NEMU_STOP;
       }
 
