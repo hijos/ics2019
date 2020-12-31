@@ -80,7 +80,7 @@ void cpu_exec(uint64_t n) {
       }
       if(flag){
         printf("Watchpoint %d triggered! \n", watch_point_no);
-        printf("last_value: 0x%08x new_value: 0x%08x", last, res);
+        printf("last_value: 0x%08x    new_value: 0x%08x\n", last, res);
         nemu_state.state = NEMU_STOP;
       }
 
