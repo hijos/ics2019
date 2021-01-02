@@ -60,7 +60,8 @@ make_DHelper(st);
 make_DHelper(AUP);
 make_DHelper(JAL);
 make_DHelper(JALR);
-
+make_DHelper(CALR);
+make_DHelper(CALI);
 
 
 #endif
