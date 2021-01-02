@@ -15,7 +15,7 @@ static inline make_DopHelper(i) {
 static inline make_DopHelper(r) {
   op->type = OP_TYPE_REG;
   op->reg = val;
-  if (load_val) {
+  if (load_val) {// true: dst register, false: src register
     rtl_lr(&op->val, op->reg, 4);
   }
 
@@ -50,4 +50,24 @@ make_DHelper(st) {
   rtl_add(&id_src->addr, &id_src->val, &id_src2->val);
 
   decode_op_r(id_dest, decinfo.isa.instr.rs2, true);
+}
+
+make_DHelper(AUP) {
+  decode_op_i(id_src, decinfo.isa.instr.imm31_12 << 12, true);
+  decode_op_r(id_dest, decinfo.isa.instr.rd, false);
+}
+
+make_DHelper(JAL) {
+  Instr instr = decinfo.isa.instr;
+  s0 = (instr.simm20<<20) + (instr.imm19_12<<12) + (instr.imm11_<<11) + (instr.imm10_1<<1);
+  decode_op_i(id_src, s0, true);
+  decode_op_r(id_dest, decinfo.isa.instr.rd, false);
+}
+
+make_DHelper(JALR) {
+  Instr instr = decinfo.isa.instr;
+  s0 = (signed)(instr.simm11_0);
+  decode_op_r(id_src, decinfo.isa.instr.rs1, true);
+  decode_op_i(id_src2, s0, true);
+  decode_op_r(id_dest, decinfo.isa.instr.rd, false);
 }
