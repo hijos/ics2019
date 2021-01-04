@@ -15,3 +15,23 @@ make_EHelper(jalr){
     rtl_j(decinfo.jmp_pc);
     print_asm_template2(jalr);
 }
+
+static uint32_t br_table[8] = {
+    RELOP_EQ, RELOP_NE, RELOP_FALSE, RELOP_FALSE, RELOP_LT, RELOP_GE, RELOP_LTU, RELOP_GEU
+};
+
+
+make_EHelper(branch) {
+    rtl_jrelop(br_table[decinfo.isa.instr.funct3],
+     &id_src->val, &id_src2->val, decinfo.jmp_pc);
+    
+    switch (br_table[decinfo.isa.instr.funct3]) {
+        case RELOP_EQ: print_asm_template3(beq); break;
+        case RELOP_NE: print_asm_template3(bne); break;
+        case RELOP_LT: print_asm_template3(blt); break;
+        case RELOP_GE: print_asm_template3(bge); break;
+        case RELOP_LTU: print_asm_template3(bltu); break;
+        case RELOP_GEU: print_asm_template3(bgeu); break;
+        default: assert(0 && "Unfinished branch opcode");
+    }
+}

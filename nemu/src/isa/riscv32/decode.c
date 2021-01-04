@@ -84,3 +84,11 @@ make_DHelper(CALI) {
   decode_op_r(id_src, decinfo.isa.instr.rs1, true);
   decode_op_r(id_dest, decinfo.isa.instr.rd, false);
 }
+
+make_DHelper(BR) {
+  Instr instr = decinfo.isa.instr;
+  s0 = (instr.simm12<<12) + (instr.imm11<<11) + (instr.imm10_5<<5) + (instr.imm4_1<<1);
+  decode_op_i(id_dest, s0, true);
+  decode_op_r(id_src, decinfo.isa.instr.rs1, true);
+  decode_op_r(id_src2, decinfo.isa.instr.rs2, true);
+}

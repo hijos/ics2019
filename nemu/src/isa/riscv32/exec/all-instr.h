@@ -14,3 +14,6 @@ make_EHelper(jal);
 make_EHelper(jalr);
 make_EHelper(cali);
 make_EHelper(calr);
+
+// pa2.2
+make_EHelper(branch);

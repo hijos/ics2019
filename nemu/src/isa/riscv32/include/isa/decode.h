@@ -63,5 +63,7 @@ make_DHelper(JALR);
 make_DHelper(CALR);
 make_DHelper(CALI);
 
+// pa2.2
+make_DHelper(BR);
 
 #endif
