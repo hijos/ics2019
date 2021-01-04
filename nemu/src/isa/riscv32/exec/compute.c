@@ -54,7 +54,7 @@ make_EHelper(cali) {
             print_asm_template2(andi);
             break;
       default:
-            assert(0 && "Unfinished CALI opcode");
+            assert(0 && "Unfinished cali opcode");
 
   }
   rtl_sr(id_dest->reg, &id_dest->val, 4);
@@ -63,163 +63,106 @@ make_EHelper(cali) {
 make_EHelper(calr) {
   int funct7 = (unsigned)decinfo.isa.instr.funct7;
   switch(decinfo.isa.instr.funct3){
-      case 0:// add sub 
-            if(funct7 != 0){
+      case 0:// add sub mul
+            if(funct7 & 0b0100000){
               rtl_sub(&id_dest->val, &id_src->val, &id_src2->val);
               print_asm_template2(sub);
             }
-            else{
+            else if(funct7 & 0b1){
+              rtl_mul_lo(&id_dest->val, &id_src->val, &id_src2->val);
+              print_asm_template2(mul);
+            }
+            else if(funct7 == 0){
               rtl_add(&id_dest->val, &id_src->val, &id_src2->val);
               print_asm_template2(add);
             }
+            else{
+              assert(0);
+            }
             break;
-      case 1:// sll
-            rtl_shl(&id_dest->val, &id_src->val, &id_src2->val);
-            print_asm_template2(sll);
+      case 1:// sll mulh
+            if(funct7 & 0b1){
+              rtl_imul_hi(&id_dest->val, &id_src->val, &id_src2->val);
+              print_asm_template2(mulh);
+            }
+            else if(funct7 == 0){
+              rtl_shl(&id_dest->val, &id_src->val, &id_src2->val);
+              print_asm_template2(sll);
+            }
+            else{
+              assert(0);
+            }
             break;
       case 2:// slt
             id_dest->val = (signed)id_src->val < (signed)id_src2->val;
             print_asm_template2(slt);
             break;
-      case 3:// sltu
-            id_dest->val = (unsigned)id_src->val < (unsigned)id_src2->val;
-            print_asm_template2(sltu);
+      case 3:// sltu mulhu
+            if(funct7 & 0b1){
+              rtl_mul_hi(&id_dest->val, &id_src->val, &id_src2->val);
+              print_asm_template2(mulhu);
+            }
+            else if(funct7 == 0){
+              id_dest->val = (unsigned)id_src->val < (unsigned)id_src2->val;
+              print_asm_template2(sltu);
+            }
+            else{
+              assert(0);
+            }
             break;
-      case 4:// xor
-            rtl_xor(&id_dest->val, &id_src->val, &id_src2->val);
-            print_asm_template2(xor);
+      case 4:// xor div
+            if(funct7 & 0b1){
+              rtl_idiv_q(&id_dest->val, &id_src->val, &id_src2->val);
+              print_asm_template2(div);
+            }
+            else if(funct7 == 0){
+              rtl_xor(&id_dest->val, &id_src->val, &id_src2->val);
+              print_asm_template2(xor);
+            }
+            else{
+              assert(0);
+            }
             break;
-      case 5:// srl sra
-            if(funct7 != 0){
+      case 5:// srl sra divu
+            if(decinfo.isa.instr.funct7 & 0x1){
+              rtl_idiv_q(&id_dest->val, &id_src->val, &id_src2->val);
+              print_asm_template2(divu);
+            }
+            else if(decinfo.isa.instr.funct7&0b0100000){
               rtl_sar(&id_dest->val, &id_src->val, &id_src2->val);
               print_asm_template2(sar);
             }
-            else {
+            else if(funct7 == 0){
               rtl_shr(&id_dest->val, &id_src->val, &id_src2->val);
               print_asm_template2(shr);
             }
+            else{
+              assert(0);
+            }
             break;
-      case 6:// or
-            rtl_or(&id_dest->val, &id_src->val, &id_src2->val);
-            print_asm_template2(or);
+      case 6:// or rem
+            if(decinfo.isa.instr.funct7 & 0x1){
+              rtl_idiv_r(&id_dest->val, &id_src->val, &id_src2->val);
+              print_asm_template2(rem);
+            }
+            else{
+              rtl_or(&id_dest->val, &id_src->val, &id_src2->val);
+              print_asm_template2(or);
+            }
             break;
-      case 7:// and
-            rtl_and(&id_dest->val, &id_src->val, &id_src2->val);
-            print_asm_template2(and);
+      case 7:// and remu
+            if(decinfo.isa.instr.funct7){
+              rtl_div_r(&id_dest->val, &id_src->val, &id_src2->val);
+              print_asm_template2(remu);
+            }
+            else{
+              rtl_and(&id_dest->val, &id_src->val, &id_src2->val);
+              print_asm_template2(and);
+            }
             break;
       default:
-            assert(0 && "Unfinished CALU opcode");
+            assert(0 && "Unfinished calr opcode");
 
   }
   rtl_sr(id_dest->reg, &id_dest->val, 4);
 }
-
-/*
-make_EHelper(calr) {
-  int funct7 = (unsigned)decinfo.isa.instr.funct7;
-  switch(decinfo.isa.instr.funct3){
-      case 0:// add sub 
-          if(funct7 & 0b0100000){
-            rtl_sub(&id_dest->val, &id_src->val, &id_src2->val);
-            print_asm_template2(sub);
-          }
-          else if(funct7 & 0b1){
-            rtl_mul_lo(&id_dest->val, &id_src->val, &id_src2->val);
-            print_asm_template2(mul);
-          }
-          else if(funct7 == 0){
-            rtl_add(&id_dest->val, &id_src->val, &id_src2->val);
-            print_asm_template2(add);
-          }
-          else{
-              assert(0);
-          }
-          break;
-          //TODO: remaining thing may need to fill
-      case 1:// sll
-          if(funct7 & 0b1){
-            rtl_imul_hi(&id_dest->val, &id_src->val, &id_src2->val);
-            print_asm_template2(mulh);
-          }
-          else if(funct7 == 0){
-            rtl_shl(&id_dest->val, &id_src->val, &id_src2->val);
-            print_asm_template2(sll);
-          }
-          else{
-              assert(0);
-          }
-            break;
-      case 2:// slt
-            id_dest->val = (signed)id_src->val < (signed)id_src2->val;
-            print_asm_template2(slt);
-            break;
-      case 3:// sltu
-          if(funct7 & 0b1){
-            rtl_mul_hi(&id_dest->val, &id_src->val, &id_src2->val);
-            print_asm_template2(mulhu);
-          }
-          else if(funct7 == 0){
-            id_dest->val = (unsigned)id_src->val < (unsigned)id_src2->val;
-            print_asm_template2(sltu);
-          }
-          else{
-              assert(0);
-          }
-            break;
-      case 4:// xor
-          if(funct7 & 0b1){
-            rtl_idiv_q(&id_dest->val, &id_src->val, &id_src2->val);
-            print_asm_template2(div);
-          }
-          else if(funct7 == 0){
-            rtl_xor(&id_dest->val, &id_src->val, &id_src2->val);
-            print_asm_template2(xor);
-          }
-          else{
-              assert(0);
-          }
-            break;
-      case 5:// srl sra
-          if(decinfo.isa.instr.funct7 & 0x1){
-            rtl_idiv_q(&id_dest->val, &id_src->val, &id_src2->val);
-            print_asm_template2(divu);
-          }
-          else if(decinfo.isa.instr.funct7&0b0100000){
-            rtl_sar(&id_dest->val, &id_src->val, &id_src2->val);
-            print_asm_template2(sar);
-          }
-          else if(funct7 == 0){
-            rtl_shr(&id_dest->val, &id_src->val, &id_src2->val);
-            print_asm_template2(shr);
-          }
-          else{
-              assert(0);
-          }
-            break;
-      case 6:// or
-          if(decinfo.isa.instr.funct7 & 0x1){
-            rtl_idiv_r(&id_dest->val, &id_src->val, &id_src2->val);
-            print_asm_template2(rem);
-          }
-          else{
-            rtl_or(&id_dest->val, &id_src->val, &id_src2->val);
-            print_asm_template2(or);
-          }
-            break;
-      case 7:// and
-          if(decinfo.isa.instr.funct7){
-            rtl_div_r(&id_dest->val, &id_src->val, &id_src2->val);
-            print_asm_template2(remu);
-          }
-          else{
-            rtl_and(&id_dest->val, &id_src->val, &id_src2->val);
-            print_asm_template2(and);
-          }
-            break;
-      default:
-            assert(0 && "Unfinished CALU opcode");
-
-  }
-  rtl_sr(id_dest->reg, &id_dest->val, 4);
-
-}*/
