@@ -26,7 +26,7 @@ static struct rule {
    * Pay attention to the precedence level of different rules.
    */
 
-  {"\\$[\\$0-9a-zA-z]+|\\$pc", TK_REG}, //registers: Can be more specific
+  {"\\$[\\$0-9a-zA-z]+|pc", TK_REG}, //registers: Can be more specific
   {"0x[0-9a-fA-F]+", TK_HEXNUM},  //Hex number: Must before number
   {"[0-9]+", TK_NUM}, //numbers
   {"-", '-'},   // minus
@@ -67,7 +67,7 @@ typedef struct token {
   char str[32];
 } Token;
 
-static Token tokens[32] __attribute__((used)) = {};
+static Token tokens[64] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 
 static bool make_token(char *e) {
