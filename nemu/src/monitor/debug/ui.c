@@ -55,7 +55,7 @@ static int cmd_info(char *args){
       isa_reg_display();
     }
     else if(args[0] == 'w'){
-      printf("%-6s%-20s%-10s\n","Num", "Experssion", "Result");
+      printf("%-6s%-20s%-10s\n","Num", "Expression", "Result");
       for(WP* tmp = head;tmp;tmp = tmp->next){
         printf("%-6d%-20s%-6d\n", tmp->NO, tmp->wp_expr, tmp->last_value);
       }
@@ -96,7 +96,7 @@ static int cmd_p(char *args){
   int res;
   res = expr(args, &success);
   if(!success){
-    printf("Wrong experssion!\n");
+    printf("Wrong expression!\n");
     return 0;
   }
   printf("0x%x %d\n", res, res);
@@ -108,7 +108,7 @@ static int cmd_w(char *args){
   int res;
   res = expr(args, &success);
   if(!success){
-    printf("Wrong experssion!\n");
+    printf("Wrong expression!\n");
     return 0;
   }
   WP *wp = new_wp();
@@ -144,7 +144,7 @@ static struct {
   { "si", "Execute N steps", cmd_si },
   { "info", "Show the information of register", cmd_info },
   { "x", "Show the details of memory", cmd_x },
-  { "p", "Print the result of an experssion", cmd_p },
+  { "p", "Print the result of an expression", cmd_p },
   { "w", "Set watchpoint", cmd_w },
   { "d", "Delete watchpoint", cmd_d },
 
