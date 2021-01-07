@@ -1,6 +1,14 @@
 #include "cpu/exec.h"
 #include "all-instr.h"
 
+/* 
+ * instr funct3
+ *  lb    000
+ *  lh    001
+ *  lw    010
+ *  lbu   100
+ *  lhu   101
+ */
 static OpcodeEntry load_table [8] = {
   EXW(ld, 1), EXW(ld, 2), EXW(ld, 4), EMPTY, EXW(ld, 1), EXW(ld, 2), EMPTY, EMPTY
 };

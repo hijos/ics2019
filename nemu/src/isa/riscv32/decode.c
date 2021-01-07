@@ -15,7 +15,7 @@ static inline make_DopHelper(i) {
 static inline make_DopHelper(r) {
   op->type = OP_TYPE_REG;
   op->reg = val;
-  if (load_val) {// true: dst register, false: src register
+  if (load_val) {// true: src register, false: dst register
     rtl_lr(&op->val, op->reg, 4);
   }
 
