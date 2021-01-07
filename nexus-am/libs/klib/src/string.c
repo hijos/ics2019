@@ -32,10 +32,10 @@ char* strncpy(char* dst, const char* src, size_t n) {
   return dst;
 }
 
-// char* strcat(char* dst, const char* src) {
-//   strcpy((char*)(dst+strlen(dst)), src);
-//   return dst;
-// }
+char* strcat(char* dst, const char* src) {
+  strcpy((char*)(dst+strlen(dst)), src);
+  return dst;
+}
 
 // int strcmp(const char* s1, const char* s2) {
 //   int i;
@@ -79,24 +79,11 @@ char* strncpy(char* dst, const char* src, size_t n) {
 // }
 
 
-// char* strncpy(char* dst, const char* src, size_t n) {
-//     int i = 0;
-//     while(src[i] && (i<n)){
-//         dst[i] = src[i];
-//         i++;
-//     }
-//     while(i<n){
-//         dst[i] = 0;
-//         i++;
-//     }
-//   return dst;
+// char* strcat(char* dst, const char* src) {
+//     int i = strlen(dst);
+//     strcpy((char*)(dst+i), src);
+//     return dst;
 // }
-
-char* strcat(char* dst, const char* src) {
-    int i = strlen(dst);
-    strcpy((char*)(dst+i), src);
-    return dst;
-}
 
 int strcmp(const char* s1, const char* s2) {
     int i = 0;
