@@ -17,9 +17,9 @@ make_EHelper(i) {
    switch(decinfo.isa.instr.funct3){
       case 0:// addi
             rtl_addi(&id_dest->val, &id_src->val, decinfo.isa.instr.simm11_0);
-            if (decinfo.isa.instr.rs1){
-              if(decinfo.isa.instr.simm11_0)
-                print_asm_template2(addi);
+            if (decinfo.isa.instr.rs1){// rs1==0 : li
+              if(decinfo.isa.instr.simm11_0)// simm11 == 0 : mv
+                print_asm_template3(addi);
               else
                 print_asm_template2(mv);              
             } 
