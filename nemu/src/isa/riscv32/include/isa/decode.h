@@ -58,6 +58,7 @@ make_DHelper(st);
 
 // pa2.1
 make_DHelper(JAL);
+make_DHelper(JALR);
 make_DHelper(R);
 make_DHelper(I);
 
