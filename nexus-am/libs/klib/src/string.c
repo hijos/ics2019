@@ -1,12 +1,12 @@
-// #include "klib.h"
+#include "klib.h"
 
-// #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
+#if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-// size_t strlen(const char *s) {
-//   int i;
-//   for(i=0;s[i];i++){}
-//   return i;
-// }
+size_t strlen(const char *s) {
+  int i;
+  for(i=0;s[i];i++){}
+  return i;
+}
 
 // char *strcpy(char* dst,const char* src) {
 //   int i = 0;
@@ -78,17 +78,11 @@
 //   return 0;
 // }
 
-// #endif
-
-#include "klib.h"
-
-#if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
-
-size_t strlen(const char *s) {
-    int i = 0;
-    for(;s[i];i++){}
-    return i;
-}
+// size_t strlen(const char *s) {
+//     int i = 0;
+//     for(;s[i];i++){}
+//     return i;
+// }
 
 char *strcpy(char* dst,const char* src) {
     int i = 0;
