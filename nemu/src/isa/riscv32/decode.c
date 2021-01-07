@@ -58,7 +58,7 @@ make_DHelper(JAL) {
   decode_op_i(id_src, s0, true);
   decode_op_r(id_dest, decinfo.isa.instr.rd, false);
 
-  print_Dop(id_src->str, OP_STR_SIZE, "0x%x", s0);
+  print_Dop(id_src->str, OP_STR_SIZE, "0x%x", s0+cpu.pc);
 }
 
 make_DHelper(I) {
