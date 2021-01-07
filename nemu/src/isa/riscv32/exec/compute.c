@@ -13,11 +13,14 @@ make_EHelper(auipc){
     print_asm_template2(auipc);
 }
 
-make_EHelper(cali) {
+make_EHelper(i) {
    switch(decinfo.isa.instr.funct3){
       case 0:// addi
             rtl_addi(&id_dest->val, &id_src->val, decinfo.isa.instr.simm11_0);
-            print_asm_template2(addi);
+            if (decinfo.isa.instr.rs1)
+              print_asm_template2(addi);
+            else
+              print_asm_template2(li);
             break;
       case 1:// slli
             rtl_shli(&id_dest->val, &id_src->val, decinfo.isa.instr.simm11_0);
@@ -60,7 +63,7 @@ make_EHelper(cali) {
   rtl_sr(id_dest->reg, &id_dest->val, 4);
 }
 
-make_EHelper(calr) {
+make_EHelper(r) {
   int funct7 = (unsigned)decinfo.isa.instr.funct7;
   switch(decinfo.isa.instr.funct3){
       case 0:// add sub mul

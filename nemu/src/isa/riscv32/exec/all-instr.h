@@ -12,8 +12,8 @@ make_EHelper(nemu_trap);
 make_EHelper(auipc);
 make_EHelper(jal);
 make_EHelper(jalr);
-make_EHelper(cali);
-make_EHelper(calr);
+make_EHelper(i);
+make_EHelper(r);
 
 // pa2.2
 make_EHelper(branch);
