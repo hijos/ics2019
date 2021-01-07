@@ -8,16 +8,16 @@ size_t strlen(const char *s) {
   return i;
 }
 
-// char *strcpy(char* dst,const char* src) {
-//   int i = 0;
-//   while(src[i]){
-//     dst[i] = src[i];
-//     i++;
-//   }
-//   assert(src[i] == '\0');
-//   dst[i] = 0;
-//   return dst;
-// }
+char *strcpy(char* dst,const char* src) {
+  int i = 0;
+  while(src[i]){
+    dst[i] = src[i];
+    i++;
+  }
+  assert(src[i] == '\0');
+  dst[i] = 0;
+  return dst;
+}
 
 // char* strncpy(char* dst, const char* src, size_t n) {
 //   int i = 0;
@@ -84,28 +84,18 @@ size_t strlen(const char *s) {
 //     return i;
 // }
 
-char *strcpy(char* dst,const char* src) {
-    int i = 0;
-    while(src[i]){
-        dst[i] = src[i];
-        i++;
-    }
-    dst[i] = 0;
-  return dst;
-}
-
-char* strncpy(char* dst, const char* src, size_t n) {
-    int i = 0;
-    while(src[i] && (i<n)){
-        dst[i] = src[i];
-        i++;
-    }
-    while(i<n){
-        dst[i] = 0;
-        i++;
-    }
-  return dst;
-}
+// char* strncpy(char* dst, const char* src, size_t n) {
+//     int i = 0;
+//     while(src[i] && (i<n)){
+//         dst[i] = src[i];
+//         i++;
+//     }
+//     while(i<n){
+//         dst[i] = 0;
+//         i++;
+//     }
+//   return dst;
+// }
 
 char* strcat(char* dst, const char* src) {
     int i = strlen(dst);
