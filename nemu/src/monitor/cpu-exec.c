@@ -52,10 +52,10 @@ void cpu_exec(uint64_t n) {
     __attribute__((unused)) vaddr_t seq_pc = exec_once();
 
     #if defined(DIFF_TEST)
-      // uint32_t instr = vaddr_read(ori_pc, 4);
-      // if((instr&0x7f) == 0b1100111){// jalr
-      //   difftest_skip_dut(1, 2);
-      // }
+      uint32_t instr = vaddr_read(ori_pc, 4);
+      if((instr&0x7f) == 0b1100111){// jalr
+        difftest_skip_dut(1, 2);
+      }
       // else if((instr&0x7f) == 0b1101011){// nemu_trap
       //   difftest_skip_ref();
       // }
