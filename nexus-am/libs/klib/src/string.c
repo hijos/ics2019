@@ -19,18 +19,18 @@ char *strcpy(char* dst,const char* src) {
   return dst;
 }
 
-// char* strncpy(char* dst, const char* src, size_t n) {
-//   int i = 0;
-//   while(src[i] && (i<n)){
-//     dst[i] = src[i];
-//     i++;
-//   }
-//   while(i<n){
-//     dst[i] = 0;
-//     i++;
-//   }
-//   return dst;
-// }
+char* strncpy(char* dst, const char* src, size_t n) {
+  int i = 0;
+  while(src[i] && (i<n)){
+    dst[i] = src[i];
+    i++;
+  }
+  while(i<n){
+    dst[i] = 0;
+    i++;
+  }
+  return dst;
+}
 
 // char* strcat(char* dst, const char* src) {
 //   strcpy((char*)(dst+strlen(dst)), src);
@@ -78,11 +78,6 @@ char *strcpy(char* dst,const char* src) {
 //   return 0;
 // }
 
-// size_t strlen(const char *s) {
-//     int i = 0;
-//     for(;s[i];i++){}
-//     return i;
-// }
 
 // char* strncpy(char* dst, const char* src, size_t n) {
 //     int i = 0;
