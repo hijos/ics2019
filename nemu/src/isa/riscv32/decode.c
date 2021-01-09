@@ -93,3 +93,11 @@ make_DHelper(BR) {
   
   print_Dop(id_dest->str, OP_STR_SIZE, "0x%x", s0);
 }
+
+make_DHelper(SYSTEM) {
+  decode_op_r(id_dest, decinfo.isa.instr.rd, false);
+  decode_op_r(id_src, decinfo.isa.instr.rs1, true);
+  decode_op_i(id_src2, decinfo.isa.instr.csr, true);
+
+  print_Dop(id_src->str, OP_STR_SIZE, "0x%x", decinfo.isa.instr.csr);
+}
