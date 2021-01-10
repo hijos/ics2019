@@ -1,5 +1,6 @@
 #include "proc.h"
 #include <elf.h>
+#include "fs.h"
 
 #ifdef __ISA_AM_NATIVE__
 # define Elf_Ehdr Elf64_Ehdr
@@ -17,12 +18,33 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   ramdisk_read(&Ehdr, 0, sizeof(Ehdr));
   Elf_Phdr Phdr;//read Program Header
   ramdisk_read(&Phdr, Ehdr.e_phoff, sizeof(Phdr));
-  for(unsigned int i = Phdr.p_filesz; i < Phdr.p_memsz;i++){
-      ((char*)Phdr.p_vaddr)[i] = 0;
-  }
   ramdisk_read((void*)Phdr.p_vaddr, Phdr.p_offset, Phdr.p_filesz);
+  memset((void*)(Phdr.p_vaddr+Phdr.p_filesz),0,(Phdr.p_memsz-Phdr.p_filesz));
 
   return Ehdr.e_entry;
+
+  // Elf_Ehdr Ehdr;
+  // Elf_Phdr Phdr;
+  // int fd = fs_open(filename,0,0);
+  // assert(fd!=-1);
+  // fs_read(fd,&Ehdr,sizeof(Elf_Ehdr));
+  // fs_lseek(fd,Ehdr.e_phoff,SEEK_SET);
+  // size_t open_offset;
+
+  // for (uint16_t i=0; i<Ehdr.e_phnum; i++){
+
+  //   fs_read(fd,&Phdr,sizeof(Elf_Phdr));
+  //   open_offset = fs_open_offset(fd);
+  //   if(Phdr.p_type == PT_LOAD){
+  //     fs_lseek(fd,Phdr.p_offset,SEEK_SET);
+  //     fs_read(fd,(void *)Phdr.p_vaddr,Phdr.p_filesz);
+  //     memset((void*)(Phdr.p_vaddr+Phdr.p_filesz),0,(Phdr.p_memsz-Phdr.p_filesz));
+  //   }
+  //   fs_lseek(fd,open_offset,SEEK_SET);
+
+  // }
+  // fs_close(fd);
+  // return Ehdr.e_entry;
 }
 
 void naive_uload(PCB *pcb, const char *filename) {
