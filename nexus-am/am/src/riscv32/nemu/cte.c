@@ -20,6 +20,7 @@ _Context* __am_irq_handle(_Context *c) {
     switch (c->cause) {
       case -1:
           ev.event = _EVENT_YIELD;
+          printf("_EVENT_YIELD!");
           break;
       case 0:
       case 1:
