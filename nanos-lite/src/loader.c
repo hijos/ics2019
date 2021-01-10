@@ -9,9 +9,20 @@
 # define Elf_Phdr Elf32_Phdr
 #endif
 
+extern size_t ramdisk_read(void *, size_t, size_t);
+
 static uintptr_t loader(PCB *pcb, const char *filename) {
-  TODO();
-  return 0;
+  // TODO();
+  Elf_Ehdr Ehdr;// read the ELF Header
+  ramdisk_read(&Ehdr, 0, sizeof(Ehdr));
+  Elf_Phdr Phdr;//read Program Header
+  ramdisk_read(&Phdr, Ehdr.e_phoff, sizeof(Phdr));
+  for(unsigned int i = Phdr.p_filesz; i < Phdr.p_memsz;i++){
+      ((char*)Phdr.p_vaddr)[i] = 0;
+  }
+  ramdisk_read((void*)Phdr.p_vaddr, Phdr.p_offset, Phdr.p_filesz);
+
+  return Ehdr.e_entry;
 }
 
 void naive_uload(PCB *pcb, const char *filename) {
