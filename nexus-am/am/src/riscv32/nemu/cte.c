@@ -7,7 +7,7 @@ _Context* __am_irq_handle(_Context *c) {
   _Context *next = c;
 
   // output the context
-  for(int i = 0; i < 32;i++){
+  for(int i = 1; i < 32;i++){
       printf("gpr[%d]:0x%x\n",i,c->gpr[i]);
   }
   printf("cause:%d\n", c->cause);
