@@ -42,7 +42,7 @@ make_EHelper(system){
   switch(instr.funct3){
     case 0b0:
         if((instr.val & ~(0x7f))==0){// ecall
-          raise_intr(reg_l(17), cpu.pc);
+          raise_intr(9, cpu.pc);
         }
         else if(instr.val == 0x10200073){// sret
           decinfo.jmp_pc = decinfo.isa.sepc + 4;
