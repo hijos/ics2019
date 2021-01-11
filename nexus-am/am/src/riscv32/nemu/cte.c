@@ -1,6 +1,7 @@
 #include <am.h>
 #include <riscv32.h>
 #include <klib.h>
+// #include </home/hust/ics2019/nanos-lite/src/syscall.h>
 
 static _Context* (*user_handler)(_Event, _Context*) = NULL;
 
@@ -18,9 +19,21 @@ _Context* __am_irq_handle(_Context *c) {
   if (user_handler) {
     _Event ev = {0};
     switch (c->cause) {
-      case -1:
+      case -1: // 自陷指令
           ev.event = _EVENT_YIELD;
           printf("_EVENT_YIELD!\n");
+          break;
+      // 系统调用
+      case 0: // SYS_exit
+      case 1: // SYS_yield
+      case 2: // SYS_open
+      case 3: // SYS_read
+      case 4: // SYS_write
+      case 7: // SYS_close
+      case 8: // SYS_lseek
+      case 9: // SYS_brk
+      case 13: // SYS_execve
+          ev.event = _EVENT_SYSCALL;
           break;
       default: ev.event = _EVENT_ERROR; break;
     }
