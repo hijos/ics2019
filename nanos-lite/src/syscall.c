@@ -1,6 +1,8 @@
 #include "common.h"
 #include "syscall.h"
 
+static int programBrk;
+
 int do_write(int fd, const void*buf, size_t count){
   if(fd==1 || fd==2){
     for(int i = 0;i < count;i++){
@@ -11,6 +13,11 @@ int do_write(int fd, const void*buf, size_t count){
   return 0;
   // int res = fs_write(fd, buf, count);
   // return res;
+}
+
+int do_brk(int addr){
+    programBrk = addr;
+    return 0;
 }
 
 _Context* do_syscall(_Context *c) {
@@ -31,6 +38,9 @@ _Context* do_syscall(_Context *c) {
         break;
     case SYS_write:
         c->GPRx = do_write(a[1], (void*)(a[2]), a[3]);
+        break;
+    case SYS_brk:
+        c->GPRx = do_brk(a[1]);
         break;
     default: panic("Unhandled syscall ID = %d", a[0]);
   }
