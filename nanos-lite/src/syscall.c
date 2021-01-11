@@ -8,8 +8,7 @@ int do_write(int fd, const void*buf, size_t count){
     }
     return count;
   }
-  if(fd==0)
-    return 0;
+  return 0;
   // int res = fs_write(fd, buf, count);
   // return res;
 }
