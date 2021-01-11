@@ -1,5 +1,6 @@
 #include "nemu.h"
 #include "device/map.h"
+#include <stdio.h>
 
 uint8_t pmem[PMEM_SIZE] PG_ALIGN = {};
 
@@ -36,6 +37,7 @@ void paddr_write(paddr_t addr, uint32_t data, int len) {
     memcpy(pmem + offset, &data, len);
   }
   else {
+    printf("paddr_write");
     return map_write(addr, data, len, fetch_mmio_map(addr));
   }
 }
