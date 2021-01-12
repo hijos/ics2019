@@ -3,6 +3,8 @@
 #include "fs.h"
 #include "proc.h"
 
+extern void naive_uload(PCB *pcb, const char *filename);
+
 static int programBrk;
 
 int do_write(int fd, const void*buf, size_t count){
@@ -52,7 +54,7 @@ _Context* do_syscall(_Context *c) {
         c->GPRx = 0;
         break;
     case SYS_exit:
-        // naive_uload(NULL,"/bin/init");
+        naive_uload(NULL,"/bin/init");
         _halt(a[1]);
         break;
     case SYS_write:
@@ -72,6 +74,12 @@ _Context* do_syscall(_Context *c) {
         break;
     case SYS_brk:
         c->GPRx = do_brk(a[1]);
+        break;
+    case SYS_execve:
+        printf("%s\n", a[1]);
+        naive_uload(NULL, (const char*)a[1]);
+        c->GPR2 = SYS_exit;
+        do_syscall(c);
         break;
     default: panic("Unhandled syscall ID = %d", a[0]);
   }
