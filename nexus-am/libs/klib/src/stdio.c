@@ -85,6 +85,49 @@ int transferNumber(char *dst, unsigned int val, int neg, int width, int is_left,
   return width;
 }
 
+int transferNumberx(char *dst, unsigned int val, int width, int is_left, char fill_char) {
+  char *p = dst;
+  int i = 0;
+  int rem = 0;
+  if(val == 0) {
+    p[i] = '0';
+    i++;
+  }
+  while(val != 0) {
+    rem = val % 16;
+    p[i] = rem + '0';
+    val = val / 16;
+    i++;
+  }
+  
+  int real_len = i;
+  if(width < real_len)
+    width = real_len;
+  if(is_left)
+    fill_char = ' ';
+  for(i = real_len; i < width; i++) {
+    dst[i] = fill_char;
+  }
+
+  // 反转字符数组
+  int head = 0, tail = 0;
+  if(is_left == 1)
+    tail = real_len - 1;
+  else  
+    tail = width - 1;
+  
+  char temp;
+  while(tail > head) {
+    temp = dst[head];
+    dst[head] = dst[tail];
+    dst[tail] = temp;
+    head++;
+    tail--;
+  }
+
+  return width;
+}
+
 int transferString(char *dst, char *str,int width, int is_left) {
   int len = 0;
   char * p = str;
@@ -176,11 +219,15 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
           neg = 1;
           val = -val;
         }
-        temp_length = transferNumber(temp_str, val, neg, width, is_left,fill_char);
+        temp_length = transferNumber(temp_str, val, neg, width, is_left, fill_char);
+        break;
+      case 'x' :
+        val = va_arg(ap, int);
+        temp_length = transferNumberx(temp_str, val, width, is_left, fill_char);
         break;
       case 'u' :
         val = va_arg(ap, int);
-        temp_length = transferNumber(temp_str, val, 0, width, is_left,fill_char);
+        temp_length = transferNumber(temp_str, val, 0, width, is_left, fill_char);
         break;
       case 's' :
         s = (char *)va_arg(ap, char *);
