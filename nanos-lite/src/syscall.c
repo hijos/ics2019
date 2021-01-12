@@ -32,10 +32,10 @@ int do_write(int fd, const void*buf, size_t count){
 //   return fs_lseek(fd, offset, whence);
 // }
 
-// int do_brk(int addr){
-//   programBrk = addr;
-//   return 0;
-// }
+int do_brk(int addr){
+  programBrk = addr;
+  return 0;
+}
 
 _Context* do_syscall(_Context *c) {
   uintptr_t a[4];
@@ -68,9 +68,9 @@ _Context* do_syscall(_Context *c) {
     // case SYS_close:
     //     c->GPRx = do_close(a[1]);
     //     break;
-    // case SYS_brk:
-    //     c->GPRx = do_brk(a[1]);
-    //     break;
+    case SYS_brk:
+        c->GPRx = do_brk(a[1]);
+        break;
     default: panic("Unhandled syscall ID = %d", a[0]);
   }
 
