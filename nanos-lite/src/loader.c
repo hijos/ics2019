@@ -29,6 +29,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   // pa3.3
   Elf_Ehdr Ehdr;
   int fd = fs_open(filename, 0, 0);
+  printf("1111111111111\n");
   fs_lseek(fd, 0, SEEK_SET);
   fs_read(fd, &Ehdr, sizeof(Ehdr));
   for(int i = 0; i < Ehdr.e_phnum; i++){
