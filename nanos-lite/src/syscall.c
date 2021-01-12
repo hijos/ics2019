@@ -1,23 +1,40 @@
 #include "common.h"
 #include "syscall.h"
+#include "fs.h"
+#include "proc.h"
 
 static int programBrk;
 
 int do_write(int fd, const void*buf, size_t count){
-  if(fd==1 || fd==2){
-    for(int i = 0;i < count;i++){
-        _putc(((char*)buf)[i]);
-    }
-    return count;
-  }
-  return 0;
-  // int res = fs_write(fd, buf, count);
-  // return res;
+  // if(fd==1 || fd==2){
+  //   for(int i = 0;i < count;i++){
+  //       _putc(((char*)buf)[i]);
+  //   }
+  //   return count;
+  // }
+  // return 0;
+  return fs_write(fd, buf, count);
+}
+
+int do_open(const char*path, int flags, int mode){
+  return fs_open(path, flags, mode);
+}
+
+int do_close(int fd){
+  return fs_close(fd);
+}
+
+int do_read(int fd, void*buf, size_t count){
+  return fs_read(fd, buf, count);
+}
+
+size_t do_lseek(int fd, size_t offset, int whence){
+  return fs_lseek(fd, offset, whence);
 }
 
 int do_brk(int addr){
-    programBrk = addr;
-    return 0;
+  programBrk = addr;
+  return 0;
 }
 
 _Context* do_syscall(_Context *c) {
@@ -38,6 +55,18 @@ _Context* do_syscall(_Context *c) {
         break;
     case SYS_write:
         c->GPRx = do_write(a[1], (void*)(a[2]), a[3]);
+        break;
+    case SYS_read:
+        c->GPRx = do_read(a[1], (void*)(a[2]), a[3]);
+        break;
+    case SYS_lseek:
+        c->GPRx = do_lseek(a[1], a[2], a[3]);
+        break;
+    case SYS_open:
+        c->GPRx = do_open((const char *)a[1], a[2], a[3]);
+        break;
+    case SYS_close:
+        c->GPRx = do_close(a[1]);
         break;
     case SYS_brk:
         c->GPRx = do_brk(a[1]);
