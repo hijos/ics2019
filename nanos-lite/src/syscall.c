@@ -7,6 +7,20 @@ extern void naive_uload(PCB *pcb, const char *filename);
 
 static int programBrk;
 
+int do_yield(){
+  _yield();
+  return 0;
+}
+
+int do_execve(const char *fname, char * const argv[], char *const envp[]) {
+  naive_uload(NULL, fname);
+}
+
+void do_exit(uintptr_t arg){
+  //_halt(arg);
+  do_execve("/bin/init", NULL, NULL);
+}
+
 int do_write(int fd, const void*buf, size_t count){
   // if(fd==1 || fd==2){
   //   for(int i = 0;i < count;i++){
@@ -50,12 +64,10 @@ _Context* do_syscall(_Context *c) {
 
   switch (a[0]) {
     case SYS_yield:
-        _yield();
-        c->GPRx = 0;
+        c->GPRx = do_yield();
         break;
     case SYS_exit:
-        naive_uload(NULL,"/bin/init");
-        _halt(a[1]);
+        do_exit(a[1]);
         break;
     case SYS_write:
         c->GPRx = do_write(a[1], (void*)(a[2]), a[3]);
@@ -76,10 +88,7 @@ _Context* do_syscall(_Context *c) {
         c->GPRx = do_brk(a[1]);
         break;
     case SYS_execve:
-        printf("%s\n", a[1]);
-        naive_uload(NULL, (const char*)a[1]);
-        c->GPR2 = SYS_exit;
-        do_syscall(c);
+        c->GPRx = do_execve(a[1], a[2], a[3]);
         break;
     default: panic("Unhandled syscall ID = %d", a[0]);
   }
