@@ -16,7 +16,6 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   // pa3.2
   Elf_Ehdr Ehdr;// read the ELF Header
   ramdisk_read(&Ehdr, 0, sizeof(Ehdr));
-  printf("111111111");
   for (uint16_t i=0; i<Ehdr.e_phnum; i++){
     Elf_Phdr Phdr;//read Program Header
     ramdisk_read(&Phdr, Ehdr.e_phoff + i*Ehdr.e_phentsize, sizeof(Phdr));
