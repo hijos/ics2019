@@ -5,6 +5,7 @@ typedef size_t (*WriteFn) (const void *buf, size_t offset, size_t len);
 
 extern size_t ramdisk_read(void*, size_t, size_t);
 extern size_t ramdisk_write(const void*, size_t, size_t);
+extern size_t serial_write(const void*, size_t, size_t);
 
 typedef struct {
   char *name;
@@ -29,9 +30,9 @@ size_t invalid_write(const void *buf, size_t offset, size_t len) {
 
 /* This is the information about all files in disk. */
 static Finfo file_table[] __attribute__((used)) = {
-  {"stdin", 0, 0, invalid_read, invalid_write},
-  {"stdout", 0, 0, invalid_read, invalid_write},
-  {"stderr", 0, 0, invalid_read, invalid_write},
+  {"stdin", 0, 0, 0, invalid_read, invalid_write},
+  {"stdout", 0, 0, 0, invalid_read, serial_write},
+  {"stderr", 0, 0, 0, invalid_read, serial_write},
 #include "files.h"
 };
 
@@ -73,7 +74,7 @@ size_t fs_write(int fd, const void *buf, size_t len){
 	assert(fd >= 0 && fd < NR_FILES);
 
 	int w_len = len;
-	if(file_table[fd].size > 0&& file_table[fd].open_offset + len > file_table[fd].size)
+	if(file_table[fd].size > 0 && file_table[fd].open_offset + len > file_table[fd].size)
 		w_len = file_table[fd].size - file_table[fd].open_offset;
 	
 	assert(w_len >= 0);
