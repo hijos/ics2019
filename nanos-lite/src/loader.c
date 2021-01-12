@@ -27,44 +27,21 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   // return Ehdr.e_entry;
 
   // pa3.3
-  // Elf_Ehdr Ehdr;
-  // int fd = fs_open(filename, 0, 0);
-  // fs_lseek(fd, 0, SEEK_SET);
-  // fs_read(fd, &Ehdr, sizeof(Ehdr));
-  // for(int i = 0; i < Ehdr.e_phnum; i++){
-  //   Elf_Phdr Phdr;
-  //   fs_lseek(fd, Ehdr.e_phoff + i*Ehdr.e_phentsize, SEEK_SET);
-  //   fs_read(fd, &Phdr, sizeof(Phdr));
-  //   if(Phdr.p_type == PT_LOAD){
-  //     fs_lseek(fd, Phdr.p_offset, SEEK_SET);
-  //     fs_read(fd, (void*)Phdr.p_vaddr, Phdr.p_filesz);
-  //     memset((void*)(Phdr.p_vaddr+Phdr.p_filesz),0,(Phdr.p_memsz-Phdr.p_filesz));
-  //   }
-  // }
-  // fs_close(fd);
-  // return Ehdr.e_entry;
-    Elf_Ehdr Ehdr;
+  Elf_Ehdr Ehdr;
   int fd = fs_open(filename, 0, 0);
   fs_lseek(fd, 0, SEEK_SET);
   fs_read(fd, &Ehdr, sizeof(Ehdr));
-  //ramdisk_read(&Ehdr, 0, sizeof(Ehdr));
-  for(int i = 0; i < Ehdr.e_phnum;i++){
-      Elf_Phdr Phdr;
-      fs_lseek(fd, Ehdr.e_phoff + i*Ehdr.e_phentsize, SEEK_SET);
-      //printf("res:%d\n", res);
-      fs_read(fd, &Phdr, sizeof(Phdr));
-      //ramdisk_read(&Phdr, Ehdr.e_phoff + i*Ehdr.e_phentsize, sizeof(Phdr));
-      if(!(Phdr.p_type & PT_LOAD)){
-          continue;
-      }
+  for(int i = 0; i < Ehdr.e_phnum; i++){
+    Elf_Phdr Phdr;
+    fs_lseek(fd, Ehdr.e_phoff + i*Ehdr.e_phentsize, SEEK_SET);
+    fs_read(fd, &Phdr, sizeof(Phdr));
+    if(Phdr.p_type == PT_LOAD){
       fs_lseek(fd, Phdr.p_offset, SEEK_SET);
       fs_read(fd, (void*)Phdr.p_vaddr, Phdr.p_filesz);
-      for(unsigned int i = Phdr.p_filesz; i < Phdr.p_memsz;i++){
-          ((char*)Phdr.p_vaddr)[i] = 0;
-      }
-      //ramdisk_read((void*)Phdr.p_vaddr, Phdr.p_offset, Phdr.p_filesz);
+      memset((void*)(Phdr.p_vaddr+Phdr.p_filesz),0,(Phdr.p_memsz-Phdr.p_filesz));
+    }
   }
-
+  fs_close(fd);
   return Ehdr.e_entry;
 }
 

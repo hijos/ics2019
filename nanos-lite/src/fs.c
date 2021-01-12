@@ -41,127 +41,69 @@ void init_fs() {
   // TODO: initialize the size of /dev/fb
 }
 
-// int fs_open(const char *pathname, int flags, int mode){
-//   for(int i = 0; i < NR_FILES;i++){
-//     if(strcmp(pathname, file_table[i].name) == 0){
-//       return i;
-//     }
-//   }
-//   assert(0 && "Can't find file");
-// }
-
-// size_t fs_read(int fd, void *buf, size_t len){
-// 	assert(fd >= 0 && fd < NR_FILES);
-
-// 	int r_len = len;
-// 	if(file_table[fd].size > 0 && file_table[fd].open_offset + len > file_table[fd].size)
-// 		r_len = file_table[fd].size - file_table[fd].open_offset;
-  
-// 	assert(r_len >= 0);
-
-// 	size_t length = 0;
-// 	if(file_table[fd].read == NULL)
-// 		length = ramdisk_read(buf, file_table[fd].disk_offset + file_table[fd].open_offset, r_len);
-// 	else
-// 		length = file_table[fd].read(buf, file_table[fd].disk_offset + file_table[fd].open_offset, r_len);
-  
-//   file_table[fd].open_offset += length;
-// 	return length;
-// }
-
-// size_t fs_write(int fd, const void *buf, size_t len){
-// 	assert(fd >= 0 && fd < NR_FILES);
-
-// 	int w_len = len;
-// 	if(file_table[fd].size > 0&& file_table[fd].open_offset + len > file_table[fd].size)
-// 		w_len = file_table[fd].size - file_table[fd].open_offset;
-	
-// 	assert(w_len >= 0);
-	
-// 	size_t length = 0;
-//   if(file_table[fd].write == NULL)
-// 		length = ramdisk_write(buf, file_table[fd].disk_offset + file_table[fd].open_offset, w_len);
-// 	else
-// 		length = file_table[fd].write(buf, file_table[fd].disk_offset + file_table[fd].open_offset, w_len);
-  
-//   file_table[fd].open_offset += length;
-// 	return length;
-// }
-
-// size_t fs_lseek(int fd, size_t offset, int whence){
-// 	assert(fd >= 0 && fd < NR_FILES);
-// 	switch (whence) {
-// 		case SEEK_SET: 
-// 			file_table[fd].open_offset = offset;
-// 			break;
-// 		case SEEK_CUR:
-// 			file_table[fd].open_offset += offset;
-// 			break;
-// 		case SEEK_END:
-// 			file_table[fd].open_offset = file_table[fd].size + offset;
-// 			break;
-// 		default: panic("There is no such whence");
-// 	}
-//   assert(file_table[fd].open_offset <= file_table[fd].size);
-// 	return file_table[fd].open_offset;
-// }
-
 int fs_open(const char *pathname, int flags, int mode){
-    for(int i = 3; i < NR_FILES;i++){
-        if(strcmp(pathname, file_table[i].name) == 0){
-            return i;
-        }
+  for(int i = 0; i < NR_FILES;i++){
+    if(strcmp(pathname, file_table[i].name) == 0){
+      return i;
     }
-    assert(0 && "Can't find file");
+  }
+  assert(0 && "Can't find file");
 }
 
 size_t fs_read(int fd, void *buf, size_t len){
-    if(fd>=3 &&(file_table[fd].open_offset+len >= file_table[fd].size)){
-        if(file_table[fd].size > file_table[fd].open_offset)
-            len = file_table[fd].size - file_table[fd].open_offset;
-        else
-            len = 0;
-    }
-    if(!file_table[fd].read){
-        ramdisk_read(buf, file_table[fd].disk_offset + file_table[fd].open_offset, len);
-    }
-    else{
-        len = file_table[fd].read(buf, file_table[fd].disk_offset + file_table[fd].open_offset, len);
-    }
-    file_table[fd].open_offset += len;
-    return len;
+	assert(fd >= 0 && fd < NR_FILES);
+
+	int r_len = len;
+	if(file_table[fd].size > 0 && file_table[fd].open_offset + len > file_table[fd].size)
+		r_len = file_table[fd].size - file_table[fd].open_offset;
+  
+	assert(r_len >= 0);
+
+	size_t length = 0;
+	if(file_table[fd].read == NULL)
+		length = ramdisk_read(buf, file_table[fd].disk_offset + file_table[fd].open_offset, r_len);
+	else
+		length = file_table[fd].read(buf, file_table[fd].disk_offset + file_table[fd].open_offset, r_len);
+  
+  file_table[fd].open_offset += length;
+	return length;
 }
 
 size_t fs_write(int fd, const void *buf, size_t len){
-    if(fd>=5 &&(file_table[fd].open_offset+len > file_table[fd].size)){
-        if(file_table[fd].size > file_table[fd].open_offset)
-            len = file_table[fd].size - file_table[fd].open_offset;
-        else
-            len = 0;
-    }
-    if(!file_table[fd].write){
-        ramdisk_write(buf, file_table[fd].disk_offset + file_table[fd].open_offset, len);
-    }
-    else{
-        file_table[fd].write(buf, file_table[fd].disk_offset + file_table[fd].open_offset, len);
-    }
-    file_table[fd].open_offset += len;
-    return len;
+	assert(fd >= 0 && fd < NR_FILES);
+
+	int w_len = len;
+	if(file_table[fd].size > 0&& file_table[fd].open_offset + len > file_table[fd].size)
+		w_len = file_table[fd].size - file_table[fd].open_offset;
+	
+	assert(w_len >= 0);
+	
+	size_t length = 0;
+  if(file_table[fd].write == NULL)
+		length = ramdisk_write(buf, file_table[fd].disk_offset + file_table[fd].open_offset, w_len);
+	else
+		length = file_table[fd].write(buf, file_table[fd].disk_offset + file_table[fd].open_offset, w_len);
+  
+  file_table[fd].open_offset += length;
+	return length;
 }
 
 size_t fs_lseek(int fd, size_t offset, int whence){
-    switch(whence){
-        case SEEK_SET:
-            file_table[fd].open_offset = offset;
-            break;
-        case SEEK_CUR:
-            file_table[fd].open_offset += offset;
-            break;
-        case SEEK_END:
-            file_table[fd].open_offset = file_table[fd].size + offset;
-            break;
-    }
-    return file_table[fd].open_offset;
+	assert(fd >= 0 && fd < NR_FILES);
+	switch (whence) {
+		case SEEK_SET: 
+			file_table[fd].open_offset = offset;
+			break;
+		case SEEK_CUR:
+			file_table[fd].open_offset += offset;
+			break;
+		case SEEK_END:
+			file_table[fd].open_offset = file_table[fd].size + offset;
+			break;
+		default: panic("There is no such whence");
+	}
+  assert(file_table[fd].open_offset <= file_table[fd].size);
+	return file_table[fd].open_offset;
 }
 
 int fs_close(int fd){
