@@ -11,6 +11,9 @@ void cpu_exec(uint64_t);
 
 extern void isa_reg_display();
 
+extern void difftest_attach();
+extern void difftest_detach();
+
 extern WP *head;
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
@@ -129,6 +132,16 @@ static int cmd_d(char *args){
   return 0;
 }
 
+static int cmd_attach(char *args){
+    difftest_attach();
+    return 0;
+}
+
+static int cmd_detach(char *args){
+    difftest_detach();
+    return 0;
+}
+
 static int cmd_help(char *args);
 
 static struct {
@@ -147,6 +160,8 @@ static struct {
   { "p", "Print the result of an expression", cmd_p },
   { "w", "Set watchpoint", cmd_w },
   { "d", "Delete watchpoint", cmd_d },
+  { "detach", "Quit difftest mode", cmd_detach},
+  { "attach", "Dive into difftest mode", cmd_attach},
 
 };
 
