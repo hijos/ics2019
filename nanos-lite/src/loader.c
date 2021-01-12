@@ -15,7 +15,6 @@ extern size_t ramdisk_read(void *, size_t, size_t);
 static uintptr_t loader(PCB *pcb, const char *filename) {
   // pa3.2
   Elf_Ehdr Ehdr;// read the ELF Header
-  printf("111111111\n");
   ramdisk_read(&Ehdr, 0, sizeof(Ehdr));
   for (uint16_t i=0; i<Ehdr.e_phnum; i++){
     Elf_Phdr Phdr;//read Program Header
