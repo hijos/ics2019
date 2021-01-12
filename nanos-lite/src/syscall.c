@@ -13,6 +13,7 @@ int do_write(int fd, const void*buf, size_t count){
   //   return count;
   // }
   // return 0;
+  Log("into write");
   return fs_write(fd, buf, count);
 }
 
@@ -25,6 +26,7 @@ int do_close(int fd){
 }
 
 int do_read(int fd, void*buf, size_t count){
+  Log("into read");
   return fs_read(fd, buf, count);
 }
 
