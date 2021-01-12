@@ -71,7 +71,7 @@ size_t fs_read(int fd, void *buf, size_t len){
 }
 
 size_t fs_write(int fd, const void *buf, size_t len){
-  printf("%s", buf);
+  printf("fd=%d, %s, len=%d", fd, buf, len);
 	assert(fd >= 0 && fd < NR_FILES);
 
 	int w_len = len;
