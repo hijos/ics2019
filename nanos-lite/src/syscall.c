@@ -17,8 +17,8 @@ int do_execve(const char *fname, char * const argv[], char *const envp[]) {
 }
 
 void do_exit(uintptr_t arg){
-  //_halt(arg);
-  do_execve("/bin/init", NULL, NULL);
+  _halt(arg);
+  // do_execve("/bin/init", NULL, NULL);
 }
 
 int do_write(int fd, const void*buf, size_t count){
