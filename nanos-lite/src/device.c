@@ -1,6 +1,9 @@
 #include "common.h"
 #include <amdev.h>
 
+extern int screen_width();
+extern int screen_height();
+
 size_t serial_write(const void *buf, size_t offset, size_t len) {
   for(int i = 0; i < len; i++){
     _putc(((char*)buf)[i]);
