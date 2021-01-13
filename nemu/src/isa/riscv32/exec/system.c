@@ -56,31 +56,37 @@ make_EHelper(system){
         s0 = readcsr(instr.csr);
         writecsr(instr.csr, id_src->val);
         rtl_sr(id_dest->reg, &s0, 4);
+        print_asm_template3(csrrw);
         break;
     case 0b010:// csrrs
         s0 = readcsr(instr.csr);
         writecsr(instr.csr, s0 | id_src->val);
         rtl_sr(id_dest->reg, &s0, 4);
+        print_asm_template3(csrrs);
         break;
 		case 0b011:// csrrc
 				s0 = readcsr(instr.csr);
         writecsr(instr.csr, s0 & ~id_src->val);
         rtl_sr(id_dest->reg, &s0, 4);
+        print_asm_template3(csrrc);
         break;
     case 0b101:// csrrwi
         s0 = readcsr(instr.csr);
         writecsr(instr.csr, id_src->reg);
         rtl_sr(id_dest->reg, &s0, 4);
+        print_asm_template3(csrrwi);
         break;
     case 0b110:// csrrsi
         s0 = readcsr(instr.csr);
         writecsr(instr.csr, s0 | id_src->reg);
         rtl_sr(id_dest->reg, &s0, 4);
+        print_asm_template3(csrrsi);
         break;
 		case 0b111:// csrrci
 				s0 = readcsr(instr.csr);
         writecsr(instr.csr, s0 & ~id_src->reg);
         rtl_sr(id_dest->reg, &s0, 4);
+        print_asm_template3(csrrci);
         break;
     default:
         assert(0 && "Unfinished system op");
