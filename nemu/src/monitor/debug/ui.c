@@ -9,6 +9,13 @@
 
 void cpu_exec(uint64_t);
 
+extern void isa_reg_display();
+
+extern void difftest_attach();
+extern void difftest_detach();
+
+extern WP *head;
+
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
   static char *line_read = NULL;
@@ -36,132 +43,106 @@ static int cmd_q(char *args) {
   return -1;
 }
 
+static int cmd_si(char *args){
+  int lineNum = 1;
+  if(args){
+    sscanf(args, "%d", &lineNum);
+  }
+  cpu_exec(lineNum);
+  return 0;
+}
+
+static int cmd_info(char *args){
+  if(args){
+    if(args[0] == 'r'){
+      isa_reg_display();
+    }
+    else if(args[0] == 'w'){
+      printf("%-6s%-20s%-10s\n","Num", "Expression", "Result");
+      for(WP* tmp = head;tmp;tmp = tmp->next){
+        printf("%-6d%-20s%-6d\n", tmp->NO, tmp->wp_expr, tmp->last_value);
+      }
+      return 0;
+    }
+    else{
+      printf("Wrong argument!\n");
+    }
+  }
+  else{
+    printf("Lack argument!\n");
+  }
+  return 0;
+}
+
+static int cmd_x(char *args){
+  int number, index;
+  number = index = -1;
+  sscanf(args, "%d 0x%x", &number, &index);
+  if(index == -1 || number <= 0 ){
+    printf("Wrong argument!\n");
+    return 0;
+  }
+  for(int i = 0; i < number; i++){
+    if(i%4 == 0){
+      printf("0x%-10x:", index + i*4);
+    }
+    printf("0x%-10x", isa_vaddr_read(index + i*4, 4));
+    if( ((i-3)%4 == 0) && (i != number-1))
+      printf("\n");
+  }
+  printf("\n");
+  return 0;
+}
+
+static int cmd_p(char *args){
+  bool success;
+  int res;
+  res = expr(args, &success);
+  if(!success){
+    printf("Wrong expression!\n");
+    return 0;
+  }
+  printf("0x%x %d\n", res, res);
+  return 0;
+}
+
+static int cmd_w(char *args){
+  bool success;
+  int res;
+  res = expr(args, &success);
+  if(!success){
+    printf("Wrong expression!\n");
+    return 0;
+  }
+  WP *wp = new_wp();
+  wp->last_value = res;
+  strcpy(wp->wp_expr, args);
+  return 0;
+}
+
+static int cmd_d(char *args){
+  int number;
+  sscanf(args, "%d", &number);
+  for(WP* tmp = head; tmp; tmp = tmp->next){
+    if(tmp->NO == number){
+      free_wp(tmp);
+      return 0;
+    }
+  }
+  return 0;
+}
+
+static int cmd_attach(char *args){
+    difftest_attach();
+    return 0;
+}
+
+static int cmd_detach(char *args){
+    difftest_detach();
+    return 0;
+}
+
 static int cmd_help(char *args);
-
-// 单步执行
-static int cmd_si(char * args);
-
-// 打印程序状态
-static int cmd_info(char * args);
-
-// 表达式求值
-static int cmd_exp(char * args);
-
-// 扫描内存
-static int cmd_scan(char * args);
-
-// 设置监视点
-static int cmd_setwp(char * args);
-
-// 移除监视点
-static int cmd_rmwp(char * args);
-
-// 扫描内存
-static int cmd_scan(char * args) {
-  // `x N EXPR` 如 x 10 $esp
-  // 求出表达式EXPR的值, 将结果作为起始内存地址, 以十六进制形式输出连续的N个4字节
-  char * N_str = strtok(NULL, " ");
-  
-  // 分割点设置为""将取得后续的所有字符串
-  char * EXPR_str = strtok(NULL, "");
-  if (N_str && EXPR_str) {
-    // 分别读取N和EXPR
-    long N = strtol(N_str, NULL, 10);
-    // long EXPR =  strtol(EXPR_str, NULL, 16);
-    bool success = false;
-    uint32_t EXPR = expr(EXPR_str, &success);
-    if (!success) {
-      Log("cmd_scan: 求值失败");
-      return -1;
-    }
-    Log("cmd_scan: x %ld 0x%08x\n", N,  EXPR);
-    long count = 0;
-    for (long offset = 0; offset < N; offset++) {
-      printf("0x");
-      for (int i = 0; i < 4; i++) {
-        // 每四个字节为一组
-        printf("%02x", pmem[EXPR + offset * 4 + i]);
-        count++;
-      }
-      printf(" ");
-      // 每8组换一行
-      if (count !=0 && count % 8 == 0) {
-        printf("\n");
-      }
-    }
-    return 0;
-  } else {
-    Log("cmd_scan: 格式有问题:  %s\n", args);
-  }
-  return -1;
-}
-
-static int cmd_si(char * args) {
-  // 单步执行，唯一参数为一个正整数，如果args为NULL，则默认步进为1
-  long steps = 1;
-  // 暂时不考虑输入的数字有误的情况
-  // IMPROVE: 根据man手册里面的内容严格判断是否是数字
-  if (args != NULL) {
-    // strtol函数会自动去除数字之后有问题的字符
-    steps = strtol(args, NULL, 10);
-  }
-  if (steps > 0) {
-    cpu_exec(steps);
-  } else {
-    Log("cmd_si: 单步执行输入的数字 = %ld < 0\n", steps);
-  }
-  return 0;
-}
-
-// 打印程序状态
-static int cmd_info(char * args) {
-  // IMPROVE: 测试是否可以直接通过*args来获取第一个字符，而不使用strtok函数
-  // 获取info后面的r/w
-  Log("进入info");
-  char *arg = strtok(NULL, " ");
-  if (arg == NULL) {
-    // QUESTION: 如果直接按回车args会是空吗
-    Log("cmd_info: 输入参数为NULL\n");
-    return 0;
-  }
-
-  if (strcmp(arg, "r") == 0) {
-    // 输入的参数是r，表示打印寄存器的值
-    Log("打印参数点");
-    isa_reg_display();
-  } else if (strcmp(arg, "w") == 0) {
-    // 打印监视点的值
-    print_wps();
-  } else {
-    Log("cmd_info: 未知命令\n");
-  }
-  return 0;
-}
-
-// 创建监视点
-static int cmd_setwp(char * args) {
-  if (!new_wp(args)) {
-    Log("cmd_setwp: 监视点创建失败\n");
-    return -1;
-  }
-  return 0;
-}
-// 移除监视点
-static int cmd_rmwp(char * args) {
-  rm_wp(strtol(args, NULL, 10));
-  return 0;
-}
-
-static int cmd_exp(char * args) {
-  bool success = false;
-  uint32_t result = expr(args, &success);
-  if (success) {
-    printf("结果为%d", result);
-    return 0;
-  }
-  Log("cmd_exp: 求值失败");
-  return -1;
-}
 
 static struct {
   char *name;
@@ -171,13 +152,16 @@ static struct {
   { "help", "Display informations about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-  { "si", "Single step", cmd_si},
-  { "info", "Show info of regs/watchpoint", cmd_info},
-  { "p", "Evaluate given expression", cmd_exp},
-  { "x", "Scan memory", cmd_scan},
-  { "w", "Set watchpoint", cmd_setwp},
-  { "d", "Remove watchpoint", cmd_rmwp},
+
   /* TODO: Add more commands */
+  { "si", "Execute N steps", cmd_si },
+  { "info", "Show the information of register", cmd_info },
+  { "x", "Show the details of memory", cmd_x },
+  { "p", "Print the result of an expression", cmd_p },
+  { "w", "Set watchpoint", cmd_w },
+  { "d", "Delete watchpoint", cmd_d },
+  { "detach", "Quit difftest mode", cmd_detach},
+  { "attach", "Dive into difftest mode", cmd_attach},
 
 };
 
@@ -185,10 +169,9 @@ static struct {
 
 static int cmd_help(char *args) {
   /* extract the first argument */
-  // strtok函数第一次调用的时候会传入args，之后对于同一个str就需要传入NULL
   char *arg = strtok(NULL, " ");
   int i;
-  // args是从"help"开始的第一个字符串，表示help要查询的具体的指令
+
   if (arg == NULL) {
     /* no argument given */
     for (i = 0; i < NR_CMD; i ++) {
