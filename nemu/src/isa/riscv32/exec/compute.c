@@ -100,9 +100,18 @@ make_EHelper(r) {
               assert(0);
             }
             break;
-      case 2:// slt
-            id_dest->val = (signed)id_src->val < (signed)id_src2->val;
-            print_asm_template3(slt);
+      case 2:// slt mulhsu
+            if(funct7 & 0b1){
+              rtl_mul_hsu(&id_dest->val, &id_src->val, &id_src2->val);
+              print_asm_template3(mulhsu);
+            }
+            else if(funct7 == 0){
+              id_dest->val = (signed)id_src->val < (signed)id_src2->val;
+              print_asm_template3(slt);
+            }
+            else{
+              assert(0);
+            }
             break;
       case 3:// sltu mulhu
             if(funct7 & 0b1){
