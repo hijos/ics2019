@@ -14,11 +14,12 @@ int do_yield(){
 
 int do_execve(const char *fname, char * const argv[], char *const envp[]) {
   naive_uload(NULL, fname);
+  do_exit(1);
 }
 
 void do_exit(uintptr_t arg){
-  _halt(arg);
-  // do_execve("/bin/init", NULL, NULL);
+  // _halt(arg);
+  do_execve("/bin/init", NULL, NULL);
 }
 
 int do_write(int fd, const void*buf, size_t count){
