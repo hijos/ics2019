@@ -13,7 +13,9 @@ int do_yield(){
 }
 
 int do_execve(const char *fname, char * const argv[], char *const envp[]) {
+  printf("%s\n", fname);
   naive_uload(NULL, fname);
+  
 }
 
 void do_exit(uintptr_t arg){
