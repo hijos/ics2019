@@ -1,11 +1,12 @@
 #include "memory/memory.h"
 #include "device/map.h"
 #include "nemu.h"
+#include <stdio.h>
 
 #define IO_SPACE_MAX (1024 * 1024)
 
 static uint8_t io_space[IO_SPACE_MAX] PG_ALIGN = {};
-static uint8_t *p_space = io_space; // p_space应该是用来标记当前可用的io地址的开始位置
+static uint8_t *p_space = io_space;
 
 uint8_t* new_space(int size) {
   uint8_t *p = p_space;
@@ -27,7 +28,6 @@ static inline void invoke_callback(io_callback_t c, uint32_t offset, int len, bo
 }
 
 uint32_t map_read(paddr_t addr, int len, IOMap *map) {
-  // Log("ma_read\n");
   assert(len >= 1 && len <= 4);
   check_bound(map, addr);
   uint32_t offset = addr - map->low;
@@ -38,7 +38,6 @@ uint32_t map_read(paddr_t addr, int len, IOMap *map) {
 }
 
 void map_write(paddr_t addr, uint32_t data, int len, IOMap *map) {
-  // Log("map_write\n");
   assert(len >= 1 && len <= 4);
   check_bound(map, addr);
   uint32_t offset = addr - map->low;
