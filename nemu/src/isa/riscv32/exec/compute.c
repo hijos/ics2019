@@ -141,7 +141,7 @@ make_EHelper(r) {
             break;
       case 5:// srl sra divu
             if(decinfo.isa.instr.funct7 & 0x1){
-              rtl_idiv_q(&id_dest->val, &id_src->val, &id_src2->val);
+              rtl_div_q(&id_dest->val, &id_src->val, &id_src2->val);
               print_asm_template3(divu);
             }
             else if(decinfo.isa.instr.funct7&0b0100000){
