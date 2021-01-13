@@ -3,7 +3,6 @@
 make_EHelper(ld) {
   Instr instr = decinfo.isa.instr;
   rtl_lm(&s0, &id_src->addr, decinfo.width);
-
   switch (decinfo.width) {
     case 4: print_asm_template2(lw); break;
     case 2:

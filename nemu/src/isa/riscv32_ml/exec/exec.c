@@ -1,13 +1,20 @@
 #include "cpu/exec.h"
 #include "all-instr.h"
 
+/* 
+ * instr funct3
+ *  lb    000
+ *  lh    001
+ *  lw    010
+ *  lbu   100
+ *  lhu   101
+ */
 static OpcodeEntry load_table [8] = {
   EXW(ld, 1), EXW(ld, 2), EXW(ld, 4), EMPTY, EXW(ld, 1), EXW(ld, 2), EMPTY, EMPTY
 };
 
 static make_EHelper(load) {
   decinfo.width = load_table[decinfo.isa.instr.funct3].width;
-  //printf("width: %d\n", decinfo.width);
   idex(pc, &load_table[decinfo.isa.instr.funct3]);
 }
 
@@ -21,10 +28,10 @@ static make_EHelper(store) {
 }
 
 static OpcodeEntry opcode_table [32] = {
-  /* b00 */ IDEX(ld, load), EMPTY, EMPTY, EMPTY, IDEX(CALUI, calui), IDEX(AUP, auipc), EMPTY, EMPTY,
-  /* b01 */ IDEX(st, store), EMPTY, EMPTY, EMPTY, IDEX(CALU, calu), IDEX(U, lui), EMPTY, EMPTY,
+  /* b00 */ IDEX(ld, load), EMPTY, EMPTY, EMPTY, IDEX(I, i), IDEX(U, auipc), EMPTY, EMPTY,
+  /* b01 */ IDEX(st, store), EMPTY, EMPTY, EMPTY, IDEX(R,r), IDEX(U, lui), EMPTY, EMPTY,
   /* b10 */ EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
-  /* b11 */ IDEX(BRA, bra), IDEX(JALR, jalr), EX(nemu_trap), IDEX(JAL, jal), IDEX(SYSTEM, system), EMPTY, EMPTY, EMPTY,
+  /* b11 */ IDEX(BR,branch), IDEX(JALR,jalr), EX(nemu_trap), IDEX(JAL, jal), IDEX(SYSTEM, system), EMPTY, EMPTY, EMPTY,
 };
 
 void isa_exec(vaddr_t *pc) {
