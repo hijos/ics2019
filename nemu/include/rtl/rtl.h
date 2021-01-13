@@ -134,12 +134,19 @@ void interpret_rtl_exit(int state, vaddr_t halt_pc, uint32_t halt_ret);
 
 static inline void rtl_not(rtlreg_t *dest, const rtlreg_t* src1) {
   // dest <- ~src1
-  TODO();
+  *dest = ~(*src1);
 }
 
 static inline void rtl_sext(rtlreg_t* dest, const rtlreg_t* src1, int width) {
   // dest <- signext(src1[(width * 8 - 1) .. 0])
-  TODO();
+  int32_t temp = *src1;
+  switch(width) {
+    case 4: *dest = *src1; return;
+    case 3: temp = temp <<  8; *dest = temp >>  8; return; 
+    case 2: temp = temp << 16; *dest = temp >> 16; return; 
+    case 1: temp = temp << 24; *dest = temp >> 24; return;
+    default: assert(0);
+  }
 }
 
 static inline void rtl_setrelopi(uint32_t relop, rtlreg_t *dest,
@@ -150,12 +157,12 @@ static inline void rtl_setrelopi(uint32_t relop, rtlreg_t *dest,
 
 static inline void rtl_msb(rtlreg_t* dest, const rtlreg_t* src1, int width) {
   // dest <- src1[width * 8 - 1]
-  TODO();
+  *dest = (((*src1) << (width * 8 - 1)) & 1);
 }
 
 static inline void rtl_mux(rtlreg_t* dest, const rtlreg_t* cond, const rtlreg_t* src1, const rtlreg_t* src2) {
   // dest <- (cond ? src1 : src2)
-  TODO();
+  *dest = (*cond) ? (*src1) : (*src2);
 }
 
 #include "isa/rtl.h"
