@@ -1,54 +1,68 @@
 #include "cpu/exec.h"
 
-make_EHelper(jal){
-    s0 = decinfo.seq_pc;
-    s1 = 4;
-    rtl_sr(id_dest->reg, &s0, 4);
-    rtl_sub(&s0, &s0, &s1);
-    rtl_add(&(decinfo.jmp_pc), &s0, &id_src->val);
-    //printf("pc:%x\n", decinfo.jmp_pc);
-    decinfo_set_jmp(true);
-    print_asm_template2(jal);
+make_EHelper(auipc) {
+  rtl_add(&id_dest->val, &cpu.pc, &id_src->val);
+  rtl_sr(id_dest->reg, &id_dest->val, 4);
+  print_asm_template2(auipc);
 }
 
-make_EHelper(jalr){
-    s0 = decinfo.seq_pc;
-    rtl_sr(id_dest->reg, &s0, 4);
-    decinfo.jmp_pc = (id_src->val+id_src2->val)&~1;
-    //printf("pc:%x\n", decinfo.jmp_pc);
-    decinfo_set_jmp(true);
-    print_asm_template2(jalr);
-}
+/*
+ *  beq  000 RELOP_EQ
+ *  bne  001 RELOP_NE
+ *       010
+ *       011
+ *  blt  100 RELOP_LT
+ *  bge  101 RELOP_GE
+ *  bltu 110 RELOP_LTU
+ *  bgeu 111 RELOP_GEU
+ */
+static uint32_t branch_table[8] = {
+    RELOP_EQ, RELOP_NE, RELOP_FALSE, RELOP_FALSE, RELOP_LT, RELOP_GE, RELOP_LTU, RELOP_GEU
+};
 
-make_EHelper(bra){
-    decinfo.jmp_pc = decinfo.seq_pc+id_dest->val-4;
-    switch(decinfo.isa.instr.funct3){
-        case 0:
-            decinfo_set_jmp((id_src->val == id_src2->val));
-            print_asm_template2(beq);
-            break;
-        case 1:
-            decinfo_set_jmp((id_src->val != id_src2->val));
-            print_asm_template2(bne);
-            break;
-        case 4:
-            decinfo_set_jmp(((signed)id_src->val < (signed)id_src2->val));
-            print_asm_template2(blt);
-            break;
-        case 5:
-            decinfo_set_jmp(((signed)id_src->val >= (signed)id_src2->val));
-            print_asm_template2(bge);
-            break;
-        case 6:
-            decinfo_set_jmp(((unsigned)id_src->val < (unsigned)id_src2->val));
-            print_asm_template2(bltu);
-            break;
-        case 7:
-            decinfo_set_jmp(((unsigned)id_src->val >= (unsigned)id_src2->val));
-            print_asm_template2(bgeu);
-            break;
-        default:
-            assert(0 && "Unfinished branch opcode");
-
+make_EHelper(branch) {
+    // ？
+    decinfo.jmp_pc=cpu.pc+id_dest->val;
+    
+    rtl_jrelop(branch_table[decinfo.isa.instr.funct3], &id_src->val, &id_src2->val, decinfo.jmp_pc);
+    
+    switch (branch_table[decinfo.isa.instr.funct3]) {
+        case RELOP_EQ: print_asm_template3(beq); break;
+        case RELOP_NE: print_asm_template3(bne); break;
+        case RELOP_LT: print_asm_template3(blt); break;
+        case RELOP_GE: print_asm_template3(bge); break;
+        case RELOP_LTU: print_asm_template3(bltu); break;
+        case RELOP_GEU: print_asm_template3(bgeu); break;
+        default: assert(0);
     }
+}
+
+make_EHelper(jal) {
+   t0 = cpu.pc + 4;
+   rtl_sr(id_dest->reg, &t0, 4);
+   rtl_add(&decinfo.jmp_pc, &id_src->val, &cpu.pc);
+   rtl_j(decinfo.jmp_pc); 
+   print_asm_template2(jal);
+}
+
+
+make_EHelper(jalr) {
+
+    // TODO: 这个地方并没有完全按照手册来执行
+    // t0 = cpu.pc + 4;
+    // rtl_sr(id_dest->reg, &t0, 4);
+    // rtl_add(&decinfo.jmp_pc, &id_src->val, &id_src2->val);    
+    // interpret_rtl_j(decinfo.jmp_pc);
+
+    // print_asm_template2(jalr);   
+    // difftest_skip_dut(1, 2);
+
+    t0 = cpu.pc + 4;
+    rtl_sr(id_dest->reg, &t0, 4);
+    decinfo.jmp_pc = (id_src->val+id_src2->val)&~1;
+    rtl_j(decinfo.jmp_pc);
+
+    difftest_skip_dut(1, 2); //difftest
+
+    print_asm_template2(jalr);
 }
