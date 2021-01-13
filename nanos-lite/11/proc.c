@@ -6,7 +6,7 @@ static PCB pcb[MAX_NR_PROC] __attribute__((used)) = {};
 static PCB pcb_boot = {};
 PCB *current = NULL;
 
-extern void naive_uload(PCB *pcb, const char *filename);
+extern void naive_uload(PCB*, const char*);
 
 void switch_boot_pcb() {
   current = &pcb_boot;
@@ -25,10 +25,13 @@ void init_proc() {
   switch_boot_pcb();
 
   Log("Initializing processes...");
-  // 测试代码
-  naive_uload(NULL, "/bin/init");
-  // load program here
 
+  // load program here
+  // naive_uload(NULL, "/bin/text");
+  // naive_uload(NULL, "/bin/events");
+  // naive_uload(NULL, "/bin/bmptest");
+  // naive_uload(NULL, "/bin/pal");
+  naive_uload(NULL, "/bin/init");
 }
 
 _Context* schedule(_Context *prev) {
