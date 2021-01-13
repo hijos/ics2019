@@ -3,80 +3,89 @@
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
 size_t strlen(const char *s) {
-  int i;
-  for(i=0;s[i];i++){}
-  return i;
+  size_t len = 0;
+  while(s[len] != '\0') {
+    len++;
+  }
+  return len;
 }
 
 char *strcpy(char* dst,const char* src) {
-  int i = 0;
-  while(src[i]){
+  
+  size_t i = 0;
+  while (src[i] != '\0') {
     dst[i] = src[i];
     i++;
   }
   assert(src[i] == '\0');
-  dst[i] = 0;
+  dst[i] = '\0';
   return dst;
 }
 
 char* strncpy(char* dst, const char* src, size_t n) {
-  int i = 0;
-  while(src[i] && (i<n)){
-    dst[i] = src[i];
-    i++;
+  size_t index = 0;
+  while(src[index] != '\0' && index++ < n) {
+    dst[index] = src[index];
   }
-  while(i<n){
-    dst[i] = 0;
-    i++;
+  // 如果src的长度小于n的话，那么就在dst的后面填充'\0'
+  while (index < n) {
+    dst[index++] = '\0';
   }
   return dst;
 }
 
 char* strcat(char* dst, const char* src) {
-  strcpy((char*)(dst+strlen(dst)), src);
+  strcpy(dst + strlen(dst), src);
   return dst;
 }
 
 int strcmp(const char* s1, const char* s2) {
-  int i = 0;
-  while (s1[i] != 0 && s1[i] == s2[i]) {
+  // assert(0);
+  size_t i = 0;
+  while (s1[i] != '\0' && s1[i] == s2[i]) {
     i++;
   }
   return ((unsigned char *) s1)[i] - ((unsigned char *) s2)[i];
 }
 
 int strncmp(const char* s1, const char* s2, size_t n) {
-  int i = 0;
-  while (s1[i] != 0 && s1[i] == s2[i]) {
+  size_t i = 0;
+  while (s1[i] != '\0' && s1[i] == s2[i]) {
     i++;
     if (i == n) {
       return 0; 
     }
   }
   return ((unsigned char *) s1)[i] - ((unsigned char *) s2)[i];
-  
 }
 
 void* memset(void* v,int c,size_t n) {
-  for(int i = 0; i < n;i++)
-    ((unsigned char *)v)[i] = (unsigned char)c;
+  unsigned char * ptr = v;
+  unsigned char val = c;
+  while (n--) {
+    ptr[n] = val;
+  }
   return v;
 }
 
 void* memcpy(void* out, const void* in, size_t n) {
-  for(int i = 0; i < n; i++)
-    ((unsigned char*)out)[i] = ((unsigned char*)in)[i];
+  const unsigned char *src = in;
+  unsigned char * dst = out;
+  while (n--) {
+    *dst++ = *src++;
+  }
   return out;
 }
 
 int memcmp(const void* s1, const void* s2, size_t n){
-  for(int i = 0; i < n; i++){
-      if(((unsigned char*)s1)[i] != ((unsigned char*)s2)[i]){
-          return ((unsigned char*)s1)[i] - ((unsigned char*)s2)[i];
-      }
+  unsigned char * ucs1 = (unsigned char *)s1;
+  unsigned char * ucs2 = (unsigned char *)s2;
+  
+  while(--n && *ucs1 == *ucs2) {
+    ucs1++;
+    ucs2++;
   }
-  return 0;
+  return *ucs1 - *ucs2;
 }
 
 #endif
-

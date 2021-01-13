@@ -1,6 +1,7 @@
 #include "nemu.h"
 #include "monitor/monitor.h"
 #include "monitor/watchpoint.h"
+#include "monitor/diff-test.h"
 
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
@@ -10,11 +11,7 @@
 #define MAX_INSTR_TO_PRINT 10
 
 /* restrict the size of log file */
-#define LOG_MAX (1024 * 1024)
-
-extern uint32_t expr(char *e, bool *success);
-
-extern WP* head;
+#define LOG_MAX (1024 * 1024 * 1024)
 
 NEMUState nemu_state = {.state = NEMU_STOP};
 
@@ -24,8 +21,6 @@ void interpret_rtl_exit(int state, vaddr_t halt_pc, uint32_t halt_ret) {
 
 vaddr_t exec_once(void);
 void difftest_step(vaddr_t ori_pc, vaddr_t next_pc);
-void difftest_skip_dut(int nr_ref, int nr_dut);
-void difftest_skip_ref(void);
 void asm_print(vaddr_t ori_pc, int instr_len, bool print_flag);
 void log_clearbuf(void);
 
@@ -51,59 +46,43 @@ void cpu_exec(uint64_t n) {
      * instruction decode, and the actual execution. */
     __attribute__((unused)) vaddr_t seq_pc = exec_once();
 
-    #if defined(DIFF_TEST)
-      uint32_t instr = vaddr_read(ori_pc, 4);
-      if((instr&0x7f) == 0b1100111){// jalr
-        difftest_skip_dut(1, 2);
-      }
-      else if((instr&0x7f) == 0b1101011){// nemu_trap
-        difftest_skip_ref();
-      }
-      else if((instr&0x7f) == 0b1110011){// system
-        difftest_skip_ref();
-      }
-      difftest_step(ori_pc, cpu.pc);
-    #endif
+#if defined(DIFF_TEST)
+  // uint32_t instr = vaddr_read(ori_pc, 4);
+  // if ((instr&0x7f) == 0b1100111) {
+  //   // jalr
+  //   Log("跳过");
+  //   difftest_skip_dut(1,2);
+  // } else if ((instr&0x7f) == 0b1101011) {
+  //   // nemu_trap
+  //   difftest_skip_ref();
+  // }
+  difftest_step(ori_pc, cpu.pc);
+#endif
 
-    #ifdef DEBUG
-      if (g_nr_guest_instr < LOG_MAX) {
-        asm_print(ori_pc, seq_pc - ori_pc, n < MAX_INSTR_TO_PRINT);
-      }
-      else if (g_nr_guest_instr == LOG_MAX) {
-        log_write("\n[Warning] To restrict the size of log file, "
+#ifdef DEBUG
+  if (g_nr_guest_instr < LOG_MAX) {
+    asm_print(ori_pc, seq_pc - ori_pc, n < MAX_INSTR_TO_PRINT);
+  }
+  else if (g_nr_guest_instr == LOG_MAX) {
+    log_write("\n[Warning] To restrict the size of log file, "
               "we do not record more instruction trace beyond this point.\n"
               "To capture more trace, you can modify the LOG_MAX macro in %s\n\n", __FILE__);
-      }
-      log_clearbuf();
+  }
+  log_clearbuf();
 
-      /* TODO: check watchpoints here. */
-      bool success;
-      int res, flag = 0;
-      int watch_point_no = -1, last = -1, new = -1;
-      for(WP *tmp = head; tmp; tmp = tmp->next){
-        res = expr(tmp->wp_expr, &success);
-        if(res != tmp->last_value){
-          flag = 1;
-          last = tmp->last_value;
-          new = res;
-          watch_point_no = tmp->NO;
-          tmp->last_value = res;
-       }
-      }
-      if(flag){
-        printf("Watchpoint %d triggered! \n", watch_point_no);
-        printf("last_value: 0x%08x    new_value: 0x%08x\n", last, new);
-        nemu_state.state = NEMU_STOP;
-      }
+    /* TODO: check watchpoints here. */
+  if (check_wps()) {
+    nemu_state.state = NEMU_STOP;
+    printf("监视点被触发\n");
+  }
+#endif
 
-    #endif
+  g_nr_guest_instr ++;
 
-    g_nr_guest_instr ++;
-
-    #ifdef HAS_IOE
-      extern void device_update();
-      device_update();
-    #endif
+#ifdef HAS_IOE
+    extern void device_update();
+    device_update();
+#endif
 
     if (nemu_state.state != NEMU_RUNNING) break;
   }

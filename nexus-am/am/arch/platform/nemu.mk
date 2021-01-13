@@ -15,8 +15,6 @@ ifdef mainargs
 MAINARGS = -a $(mainargs)
 endif
 NEMU_ARGS = -b $(MAINARGS) -l $(shell dirname $(BINARY))/nemu-log.txt $(BINARY).bin
-# NEMU_ARGS = -l $(shell dirname $(BINARY))/nemu-log.txt $(BINARY).bin
-
 
 image:
 	@echo + LD "->" $(BINARY_REL).elf

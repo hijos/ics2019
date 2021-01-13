@@ -1,42 +1,28 @@
 #include <am.h>
 #include <riscv32.h>
-#include <klib.h>
-// #include </home/hust/ics2019/nanos-lite/src/syscall.h>
-
+// #include "syscall.h"
 static _Context* (*user_handler)(_Event, _Context*) = NULL;
 
 _Context* __am_irq_handle(_Context *c) {
+  // Log("进入了handle函数");
+  // _halt(1);  
   _Context *next = c;
-
-  // output the context
-  // for(int i = 1; i < 32;i++){
-  //     printf("gpr[%d]:%d\n",i,c->gpr[i]);
-  // }
-  // printf("cause:%d\n", c->cause);
-  // printf("status:%d\n", c->status);
-  // printf("epc:0x%x\n", c->epc);
-
   if (user_handler) {
     _Event ev = {0};
-    switch (c->cause) {
-      case -1: // 自陷指令
-          ev.event = _EVENT_YIELD;
-          printf("_EVENT_YIELD!\n");
-          break;
-      // 系统调用
-      case 0: // SYS_exit
-      case 1: // SYS_yield
-      case 2: // SYS_open
-      case 3: // SYS_read
-      case 4: // SYS_write
-      case 7: // SYS_close
-      case 8: // SYS_lseek
-      case 9: // SYS_brk
-      case 13: // SYS_execve
-          ev.event = _EVENT_SYSCALL;
-          break;
-      default: ev.event = _EVENT_ERROR; break;
+    // 如果是-1的话就是yiled，如果是0-19的话，就作为系统调用号，也就是_EVENT_SYSCALL
+    if (c->cause == -1) {
+      ev.event = _EVENT_YIELD;
+    } else if (c->cause >= 0 && c->cause <= 19) {
+      ev.event = _EVENT_SYSCALL;
+    } else {
+      ev.event = _EVENT_ERROR;
     }
+    // switch (c->cause) {
+    //   case -1: ev.event = _EVENT_YIELD; break;
+    //   case 0: ev.event = _EVENT_SYSCALL; break;
+    //   case 1: ev.event = _EVENT_SYSCALL;break;
+    //   default: ev.event = _EVENT_ERROR; break;
+    // }
 
     next = user_handler(ev, c);
     if (next == NULL) {
@@ -55,14 +41,15 @@ int _cte_init(_Context*(*handler)(_Event, _Context*)) {
 
   // register event handler
   user_handler = handler;
-
+  
   return 0;
 }
 
 _Context *_kcontext(_Area stack, void (*entry)(void *), void *arg) {
   return NULL;
 }
-
+// 通过ecall指令使得cpu自陷，将会跳转到ecall指令的执行
+// 其中li a7, -1将a7设置为-1，表示当前的ecall类型是自陷
 void _yield() {
   asm volatile("li a7, -1; ecall");
 }
